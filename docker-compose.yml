@@ -1,6 +1,5 @@
-# Ponto de partida OPCIONAL. Usar Docker é um desejável, não uma obrigação.
-# O mock-service e um banco já estão prontos. Se quiser, complete com os SEUS
-# serviços: "api" (NestJS) e "web" (React).
+# Sobe tudo com: docker compose up --build
+# Tela: http://localhost:5173 · API: http://localhost:3000 · Cadastro: http://localhost:4000
 
 services:
   mock-service:
@@ -8,8 +7,11 @@ services:
     ports:
       - "4000:4000"
 
+  # A fila fica em memória (ver ENTREGA.md), então o banco não sobe por padrão.
+  # Para subir mesmo assim: docker compose --profile banco up
   db:
     image: postgres:16-alpine
+    profiles: ["banco"]
     environment:
       POSTGRES_USER: desafio
       POSTGRES_PASSWORD: desafio
@@ -19,28 +21,22 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  # ------------------------------------------------------------------
-  # EXEMPLO (descomente e ajuste, se for usar Docker).
-  # A URL do serviço externo, a partir da sua api, é http://mock-service:4000
-  # (nome do serviço na rede do compose).
-  #
-  # api:
-  #   build: ./api
-  #   environment:
-  #     CADASTRO_URL: http://mock-service:4000
-  #     # DATABASE_URL: postgres://desafio:desafio@db:5432/checkin  (se usar banco)
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - mock-service
-  #
-  # web:
-  #   build: ./web
-  #   ports:
-  #     - "5173:5173"
-  #   depends_on:
-  #     - api
-  # ------------------------------------------------------------------
+  api:
+    build: ./api
+    environment:
+      CADASTRO_URL: http://mock-service:4000
+      WEB_ORIGIN: http://localhost:5173
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mock-service
+
+  web:
+    build: ./web
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
 
 volumes:
   db_data:
