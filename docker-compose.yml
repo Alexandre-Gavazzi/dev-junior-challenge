@@ -1,17 +1,19 @@
 # Sobe tudo com: docker compose up --build
-# Tela: http://localhost:5173 · API: http://localhost:3000 · Cadastro: http://localhost:4000
+# Tela: http://localhost:5173 · API: http://localhost:3000 (docs em /docs) · Cadastro: http://localhost:4000
 
 services:
   mock-service:
     build: ./mock-service
     ports:
       - "4000:4000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-  # A fila fica em memória (ver ENTREGA.md), então o banco não sobe por padrão.
-  # Para subir mesmo assim: docker compose --profile banco up
   db:
     image: postgres:16-alpine
-    profiles: ["banco"]
     environment:
       POSTGRES_USER: desafio
       POSTGRES_PASSWORD: desafio
@@ -20,23 +22,39 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "desafio", "-d", "checkin"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   api:
     build: ./api
     environment:
       CADASTRO_URL: http://mock-service:4000
+      DATABASE_URL: postgres://desafio:desafio@db:5432/checkin
       WEB_ORIGIN: http://localhost:5173
     ports:
       - "3000:3000"
+    # A API só sobe com o banco pronto (ela cria a tabela na subida)
     depends_on:
-      - mock-service
+      db:
+        condition: service_healthy
+      mock-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   web:
     build: ./web
     ports:
       - "5173:80"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
 volumes:
   db_data:
