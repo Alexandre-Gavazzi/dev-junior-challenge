@@ -11,6 +11,19 @@ export function contarDigitos(valor: string): number {
   return valor.replace(/\D/g, '').length;
 }
 
+// Mesma conta da API: só serve para avisar antes de enviar
+export function cpfValido(valor: string): boolean {
+  const d = valor.replace(/\D/g, '');
+  if (d.length !== 11) return false;
+  const calcular = (tamanho: number) => {
+    let soma = 0;
+    for (let i = 0; i < tamanho; i++) soma += Number(d[i]) * (tamanho + 1 - i);
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+  return calcular(9) === Number(d[9]) && calcular(10) === Number(d[10]);
+}
+
 const formatoHora = new Intl.DateTimeFormat('pt-BR', {
   hour: '2-digit',
   minute: '2-digit',

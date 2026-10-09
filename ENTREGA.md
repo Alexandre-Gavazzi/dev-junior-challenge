@@ -58,7 +58,7 @@ Respostas de erro, sempre com `{ "message": "..." }` em português:
 
 | Código | Quando |
 |---|---|
-| 400 | CPF vazio ou em formato inválido |
+| 400 | CPF vazio, em formato inválido ou com dígito verificador errado |
 | 404 | CPF não existe no cadastro |
 | 409 | O paciente já fez check-in hoje |
 | 502 | O cadastro está fora do ar ou respondeu algo inesperado |
@@ -80,7 +80,15 @@ Escolhi assim para garantir o fluxo completo funcionando primeiro, que é o que 
 
 **Uma dificuldade real aqui.** Quando derrubei o mock para testar, esperava o erro de conexão recusada (`ECONNREFUSED`). Mas rodando no Docker, a porta continua aberta pelo próprio Docker e o erro vem diferente (`UND_ERR_SOCKET`, resposta vazia). Se eu tivesse tratado só o `ECONNREFUSED`, a queda no Docker viraria um erro 500 genérico. Então qualquer falha de rede com o cadastro vira 502.
 
-**CPF.** Aceito com ou sem pontuação e normalizo para 11 dígitos antes de chamar o cadastro. O README do cadastro diz "somente dígitos", então não quis depender de ele aceitar pontuação. Isso também evita que alguém mande algo como `../health` e faça a API chamar outra rota do cadastro. Não validei o dígito verificador porque os CPFs de teste (`11111111111`) seriam recusados; com dados reais eu validaria.
+**CPF.** Aceito com ou sem pontuação e normalizo para 11 dígitos antes de chamar o cadastro. O README do cadastro diz "somente dígitos", então não quis depender de ele aceitar pontuação. Isso também evita que alguém mande algo como `../health` e faça a API chamar outra rota do cadastro.
+
+Também confiro os dígitos verificadores, na tela e na API. Na tela, para quem está no totem saber na hora que digitou errado ("CPF inválido") em vez de receber "não encontrado". Na API, para não gastar uma chamada ao cadastro com um número que não pode existir. Os CPFs de teste do cadastro passam na conta (CPF com todos os dígitos iguais fecha o cálculo), então não bloqueei esse caso. Na prática:
+
+| Exemplo | Resposta |
+|---|---|
+| `312.312.312-31` | 400, CPF inválido (nem chega ao cadastro) |
+| `99999999999` ou `12345678909` | 404, CPF válido mas fora do cadastro |
+| `11111111111` | 201, check-in feito |
 
 **Check-in repetido.** O mesmo paciente não entra duas vezes na fila no mesmo dia (409). Pensei no totem: a pessoa aperta o botão duas vezes. A verificação e a gravação acontecem sem `await` entre elas, então nem dois cliques ao mesmo tempo passam. Tem um teste para isso, e conferi que ele falha se a verificação for feita antes da chamada ao cadastro.
 

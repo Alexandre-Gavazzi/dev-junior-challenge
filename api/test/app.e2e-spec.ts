@@ -78,6 +78,7 @@ describe('Check-ins (e2e)', () => {
     [{}, 'Informe o CPF.'],
     [{ cpf: 11111111111 }, 'Envie o CPF como texto.'],
     [{ cpf: '123' }, 'CPF inválido. Use 11 dígitos, com ou sem pontuação.'],
+    [{ cpf: '312.312.312-31' }, 'CPF inválido. Confira os números.'],
     [
       { cpf: '../health' },
       'CPF inválido. Use 11 dígitos, com ou sem pontuação.',

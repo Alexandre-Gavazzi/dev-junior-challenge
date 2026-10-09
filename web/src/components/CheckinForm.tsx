@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { criarCheckin } from '../api';
-import { contarDigitos, formatarCpf } from '../formatacao';
+import { contarDigitos, cpfValido, formatarCpf } from '../formatacao';
 
 type Aviso = { tipo: 'sucesso' | 'erro'; texto: string };
 
@@ -14,6 +14,7 @@ export function CheckinForm({ onCheckin }: Props) {
   const [aviso, setAviso] = useState<Aviso | null>(null);
 
   const completo = contarDigitos(cpf) === 11;
+  const invalido = completo && !cpfValido(cpf);
 
   // No totem o próximo paciente não deve ver o nome de quem passou antes
   useEffect(() => {
@@ -24,7 +25,7 @@ export function CheckinForm({ onCheckin }: Props) {
 
   async function enviar(evento: FormEvent) {
     evento.preventDefault();
-    if (!completo || enviando) return;
+    if (!completo || invalido || enviando) return;
 
     setEnviando(true);
     setAviso(null);
@@ -64,7 +65,12 @@ export function CheckinForm({ onCheckin }: Props) {
           autoFocus
         />
       </label>
-      <button type="submit" disabled={!completo || enviando}>
+      {invalido && (
+        <p className="aviso aviso-erro campo-aviso" role="alert">
+          CPF inválido. Confira os números.
+        </p>
+      )}
+      <button type="submit" disabled={!completo || invalido || enviando}>
         {enviando ? 'Enviando...' : 'Fazer check-in'}
       </button>
       {aviso && (

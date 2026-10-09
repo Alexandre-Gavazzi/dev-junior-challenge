@@ -114,6 +114,10 @@ button:disabled {
   border-radius: var(--raio);
 }
 
+.campo-aviso {
+  margin: -4px 0 16px;
+}
+
 .aviso-sucesso {
   background: var(--sucesso-fundo);
   color: var(--sucesso-texto);

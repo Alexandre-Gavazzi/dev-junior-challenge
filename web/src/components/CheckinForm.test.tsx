@@ -29,6 +29,19 @@ describe('CheckinForm', () => {
     expect(botao).toBeEnabled();
   });
 
+  it('avisa CPF com dígito verificador errado sem chamar a API', async () => {
+    const fetchFalso = respondeCom(201, {});
+    render(<CheckinForm onCheckin={() => {}} />);
+
+    await userEvent.type(screen.getByLabelText('CPF'), '31231231231');
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'CPF inválido. Confira os números.',
+    );
+    expect(screen.getByRole('button', { name: 'Fazer check-in' })).toBeDisabled();
+    expect(fetchFalso).not.toHaveBeenCalled();
+  });
+
   it('mostra o nome do paciente e avisa a fila depois do check-in', async () => {
     const fetchFalso = respondeCom(201, {
       id: '1',
