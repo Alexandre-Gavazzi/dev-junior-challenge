@@ -22,6 +22,12 @@ export class CheckinsPostgresRepository
 
   constructor(private readonly pool: Pool) {
     super();
+    // Se o banco derruba uma conexão parada, o pg emite 'error' no pool.
+    // Sem ouvinte, o Node encerra a API inteira. Aqui só registra; a próxima
+    // consulta abre outra conexão sozinha.
+    pool.on('error', (erro) => {
+      this.logger.warn(`Conexão com o banco caiu: ${erro.message}`);
+    });
   }
 
   // Sem ferramenta de migração: uma tabela só, criada na subida se não existir
