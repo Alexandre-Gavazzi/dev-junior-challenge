@@ -22,9 +22,9 @@ describe('CadastroClient', () => {
   function respondeCom(status: number, corpo: unknown) {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify(corpo), { status }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify(corpo), { status })),
     );
   }
 

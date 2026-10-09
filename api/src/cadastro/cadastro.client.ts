@@ -36,7 +36,8 @@ export class CadastroClient {
       });
 
       if (resposta.status === 404) return null;
-      if (!resposta.ok) throw new Error(`cadastro respondeu ${resposta.status}`);
+      if (!resposta.ok)
+        throw new Error(`cadastro respondeu ${resposta.status}`);
 
       const corpo = (await resposta.json()) as { nome?: unknown };
       if (typeof corpo.nome !== 'string' || corpo.nome.trim() === '') {
@@ -47,7 +48,9 @@ export class CadastroClient {
     } catch (erro) {
       // CPF fica fora do log de propósito
       if (erro instanceof Error && erro.name === 'TimeoutError') {
-        this.logger.warn(`Cadastro sem resposta em ${this.config.timeoutMs} ms`);
+        this.logger.warn(
+          `Cadastro sem resposta em ${this.config.timeoutMs} ms`,
+        );
         throw new GatewayTimeoutException(
           'O cadastro de pacientes demorou para responder. Tente novamente.',
         );
@@ -55,7 +58,9 @@ export class CadastroClient {
 
       // Cadastro fora do ar aparece de formas diferentes (ECONNREFUSED,
       // conexão fechada pelo proxy do Docker...). Tudo vira 502.
-      this.logger.error(`Falha ao consultar o cadastro: ${descreverErro(erro)}`);
+      this.logger.error(
+        `Falha ao consultar o cadastro: ${descreverErro(erro)}`,
+      );
       throw new BadGatewayException(
         'Cadastro de pacientes indisponível no momento. Tente novamente.',
       );
