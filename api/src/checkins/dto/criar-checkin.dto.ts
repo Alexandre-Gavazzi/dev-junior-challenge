@@ -1,9 +1,14 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsDefined, IsString, Matches, ValidateBy } from 'class-validator';
 import { digitosVerificadoresOk, FORMATO_CPF } from '../../common/cpf.js';
 
 // Os validadores rodam de baixo para cima; com stopAtFirstError vale a primeira falha
 export class CriarCheckinDto {
+  @ApiProperty({
+    example: '111.111.111-11',
+    description: 'CPF com ou sem pontuação',
+  })
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() : value,
   )

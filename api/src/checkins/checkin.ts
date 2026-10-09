@@ -1,4 +1,5 @@
 import { mascararCpf } from '../common/cpf.js';
+import { CheckinRespostaDto } from './dto/checkin-resposta.dto.js';
 
 export interface Checkin {
   id: string;
@@ -7,15 +8,8 @@ export interface Checkin {
   chegadaEm: Date;
 }
 
-export interface CheckinResposta {
-  id: string;
-  nome: string;
-  cpf: string;
-  chegadaEm: string;
-}
-
 // O CPF completo não sai da API: a tela da recepção não precisa dele
-export function paraResposta(checkin: Checkin): CheckinResposta {
+export function paraResposta(checkin: Checkin): CheckinRespostaDto {
   return {
     id: checkin.id,
     nome: checkin.nome,

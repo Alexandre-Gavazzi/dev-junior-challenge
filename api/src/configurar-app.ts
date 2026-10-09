@@ -3,6 +3,7 @@ import {
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 // Usado pelo main.ts e pelo teste e2e, para os dois rodarem igual
 export function configurarApp(app: INestApplication): void {
@@ -21,5 +22,17 @@ export function configurarApp(app: INestApplication): void {
         return new BadRequestException(mensagem ?? 'Requisição inválida.');
       },
     }),
+  );
+
+  // Documentação navegável em /docs (JSON em /docs-json)
+  const documento = new DocumentBuilder()
+    .setTitle('Check-in de pacientes')
+    .setDescription(
+      'Totem de check-in: busca o nome no cadastro e organiza a fila do dia.',
+    )
+    .setVersion('1.0')
+    .build();
+  SwaggerModule.setup('docs', app, () =>
+    SwaggerModule.createDocument(app, documento),
   );
 }

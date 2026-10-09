@@ -5,6 +5,8 @@ import { configurarApp } from './configurar-app.js';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   configurarApp(app);
+  // Fecha a conexão com o banco quando o container recebe SIGTERM
+  app.enableShutdownHooks();
   await app.listen(process.env.PORT ?? 3000);
 }
 await bootstrap();

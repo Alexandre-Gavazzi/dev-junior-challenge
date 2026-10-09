@@ -8,7 +8,7 @@ import { CadastroClient } from '../cadastro/cadastro.client.js';
 import { normalizarCpf } from '../common/cpf.js';
 import { diaNoHospital, Relogio } from '../common/relogio.js';
 import { Checkin } from './checkin.js';
-import { CheckinsRepository } from './checkins.repository.js';
+import { CheckinsRepository } from './repositorio/checkins.repository.js';
 
 @Injectable()
 export class CheckinsService {
@@ -28,24 +28,26 @@ export class CheckinsService {
       );
     }
 
-    // Verificação e gravação sem await entre elas: dois cliques seguidos
-    // no totem não conseguem passar os dois por aqui.
     const agora = this.relogio.agora();
-    if (this.repositorio.buscarDoDia(cpf, diaNoHospital(agora))) {
-      throw new ConflictException('Este paciente já fez check-in hoje.');
-    }
-
     const checkin: Checkin = {
       id: randomUUID(),
       cpf,
       nome: paciente.nome,
       chegadaEm: agora,
     };
-    this.repositorio.salvar(checkin);
+
+    // Quem garante um check-in por dia é o repositório, no mesmo passo da gravação
+    const registrado = await this.repositorio.registrar(
+      checkin,
+      diaNoHospital(agora),
+    );
+    if (!registrado) {
+      throw new ConflictException('Este paciente já fez check-in hoje.');
+    }
     return checkin;
   }
 
-  listarFilaDoDia(): Checkin[] {
+  listarFilaDoDia(): Promise<Checkin[]> {
     return this.repositorio.listarDoDia(diaNoHospital(this.relogio.agora()));
   }
 }

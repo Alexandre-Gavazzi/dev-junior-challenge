@@ -1,7 +1,7 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { CadastroClient } from '../cadastro/cadastro.client.js';
 import { Relogio } from '../common/relogio.js';
-import { CheckinsRepository } from './checkins.repository.js';
+import { CheckinsMemoriaRepository } from './repositorio/memoria.repository.js';
 import { CheckinsService } from './checkins.service.js';
 
 describe('CheckinsService', () => {
@@ -19,7 +19,7 @@ describe('CheckinsService', () => {
     relogio = { agora: vi.fn().mockReturnValue(MANHA) };
     service = new CheckinsService(
       cadastro as unknown as CadastroClient,
-      new CheckinsRepository(),
+      new CheckinsMemoriaRepository(),
       relogio as unknown as Relogio,
     );
   });
@@ -32,7 +32,7 @@ describe('CheckinsService', () => {
       nome: 'Ana Souza',
       chegadaEm: MANHA,
     });
-    expect(service.listarFilaDoDia()).toHaveLength(1);
+    expect(await service.listarFilaDoDia()).toHaveLength(1);
   });
 
   it('normaliza o CPF antes de consultar o cadastro', async () => {
@@ -47,7 +47,7 @@ describe('CheckinsService', () => {
     await expect(service.criar('99999999999')).rejects.toBeInstanceOf(
       NotFoundException,
     );
-    expect(service.listarFilaDoDia()).toHaveLength(0);
+    expect(await service.listarFilaDoDia()).toHaveLength(0);
   });
 
   it('recusa o segundo check-in do mesmo paciente no dia, mesmo com pontuação', async () => {
@@ -68,7 +68,7 @@ describe('CheckinsService', () => {
       'fulfilled',
       'rejected',
     ]);
-    expect(service.listarFilaDoDia()).toHaveLength(1);
+    expect(await service.listarFilaDoDia()).toHaveLength(1);
   });
 
   it('lista a fila do dia em ordem de chegada', async () => {
@@ -81,7 +81,7 @@ describe('CheckinsService', () => {
     relogio.agora.mockReturnValue(new Date('2026-10-09T13:05:00Z'));
     await service.criar('22222222222');
 
-    expect(service.listarFilaDoDia().map((c) => c.nome)).toEqual([
+    expect((await service.listarFilaDoDia()).map((c) => c.nome)).toEqual([
       'Ana Souza',
       'Bruno Carvalho',
     ]);
@@ -94,11 +94,11 @@ describe('CheckinsService', () => {
 
     // 23h de 09/10 em São Paulo: mesmo dia, o paciente continua na fila
     relogio.agora.mockReturnValue(new Date('2026-10-10T02:00:00Z'));
-    expect(service.listarFilaDoDia()).toHaveLength(1);
+    expect(await service.listarFilaDoDia()).toHaveLength(1);
 
     // 00h30 de 10/10 em São Paulo: dia novo, fila vazia
     relogio.agora.mockReturnValue(new Date('2026-10-10T03:30:00Z'));
-    expect(service.listarFilaDoDia()).toHaveLength(0);
+    expect(await service.listarFilaDoDia()).toHaveLength(0);
   });
 
   it('deixa o paciente fazer check-in de novo no dia seguinte', async () => {
