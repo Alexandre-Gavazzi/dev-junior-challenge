@@ -92,6 +92,24 @@ describe('Check-ins (e2e)', () => {
     expect(resposta.body.message).toBe(mensagem);
   });
 
+  it('publica a documentação com os dois endpoints e todos os erros', async () => {
+    const resposta = await request(app.getHttpServer())
+      .get('/docs-json')
+      .expect(200);
+
+    const checkins = resposta.body.paths['/checkins'];
+    expect(Object.keys(checkins).sort()).toEqual(['get', 'post']);
+    expect(Object.keys(checkins.post.responses).sort()).toEqual([
+      '201',
+      '400',
+      '404',
+      '409',
+      '502',
+      '503',
+      '504',
+    ]);
+  });
+
   it('responde o health', () => {
     return request(app.getHttpServer())
       .get('/health')
