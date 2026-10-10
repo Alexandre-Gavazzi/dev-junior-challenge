@@ -1,12 +1,12 @@
-import {
-  BadRequestException,
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 // Usado pelo main.ts e pelo teste e2e, para os dois rodarem igual
-export function configurarApp(app: INestApplication): void {
+export function configurarApp(app: NestExpressApplication): void {
+  // Não anunciar qual servidor está por trás
+  app.disable('x-powered-by');
+
   app.enableCors({ origin: process.env.WEB_ORIGIN ?? 'http://localhost:5173' });
 
   app.useGlobalPipes(

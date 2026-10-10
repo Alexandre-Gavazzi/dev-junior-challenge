@@ -1,14 +1,13 @@
-import { INestApplication } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
-import { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
 import { CadastroClient } from '../src/cadastro/cadastro.client.js';
 import { configurarApp } from '../src/configurar-app.js';
 
 // API inteira (rotas, validação, serviço), com o cadastro simulado
 describe('Check-ins (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: NestExpressApplication;
 
   const pacientes: Record<string, string> = {
     '11111111111': 'Ana Souza',
@@ -24,7 +23,7 @@ describe('Check-ins (e2e)', () => {
       })
       .compile();
 
-    app = modulo.createNestApplication();
+    app = modulo.createNestApplication<NestExpressApplication>();
     configurarApp(app);
     await app.init();
   });
@@ -108,6 +107,12 @@ describe('Check-ins (e2e)', () => {
       '503',
       '504',
     ]);
+  });
+
+  it('não anuncia o servidor no cabeçalho', async () => {
+    const resposta = await request(app.getHttpServer()).get('/health');
+
+    expect(resposta.headers['x-powered-by']).toBeUndefined();
   });
 
   it('responde o health', () => {

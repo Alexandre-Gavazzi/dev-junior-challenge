@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module.js';
 import { configurarApp } from './configurar-app.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   configurarApp(app);
   // Fecha a conexão com o banco quando o container recebe SIGTERM
   app.enableShutdownHooks();
