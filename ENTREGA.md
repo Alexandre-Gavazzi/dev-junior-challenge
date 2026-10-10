@@ -148,7 +148,7 @@ Também confiro os dígitos verificadores, na tela e na API. Na tela, para quem 
 
 **Outras pedras no caminho.** A imagem Docker com Node 22 falhou no `npm ci` porque o lock foi gerado com npm 11; passei para Node 24 (LTS).
 
-**Uso de IA.** Usei o Claude Code como par durante o desenvolvimento: para discutir as opções de cada decisão, revisar o código e montar os testes. As escolhas acima foram minhas e revisei tudo o que entrou.
+**Uso de IA.** Usei o Claude Code como par de programação durante todo o desafio. As decisões foram minhas, e o Claude escreveu boa parte do código e dos testes a partir delas. Para revisar, usei skills que mantenho no meu dia a dia: roteiros de QA e de revisão de código que cobrem segurança, vulnerabilidades das dependências, testes de tela no celular e no computador, e a checagem do que este documento afirma contra o código. Revisei o que entrou e testei na prática: foi derrubando o cadastro e o banco de propósito que apareceram os dois bugs reais descritos acima.
 
 ## O que faria com mais tempo
 
