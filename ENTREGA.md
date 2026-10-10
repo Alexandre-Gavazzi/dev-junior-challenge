@@ -24,7 +24,7 @@ Para parar: `docker compose down`. Para apagar também os dados do banco: `docke
 
 ### Sem Docker
 
-Precisa do Node 24 ou mais novo. Um terminal para cada:
+Precisa do Node 22 ou mais novo (testado no 22, 24 e 26). Um terminal para cada:
 
 ```bash
 # 1. cadastro
@@ -62,6 +62,12 @@ O teste do repositório no Postgres só roda com um banco de teste (ele esvazia 
 ```bash
 docker compose exec db psql -U desafio -d checkin -c "CREATE DATABASE checkin_teste"
 cd api && TEST_DATABASE_URL=postgres://desafio:desafio@localhost:5432/checkin_teste npm run test:e2e
+```
+
+No PowerShell, a última linha fica:
+
+```powershell
+cd api; $env:TEST_DATABASE_URL="postgres://desafio:desafio@localhost:5432/checkin_teste"; npm run test:e2e
 ```
 
 A cada push o GitHub Actions roda lint, testes (incluindo o Postgres), build e um check-in de ponta a ponta com o `docker compose`.
